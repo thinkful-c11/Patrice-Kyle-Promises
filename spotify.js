@@ -18,11 +18,27 @@ var getArtist = function(name) {
     limit: 1,
     type: 'artist'
   };
+
+
   return getFromApi('search',query).then(response=>{
     artist = response.artists.items[0];
-    console.log(artist);
+    //console.log(artist);
     return artist;
-  }).catch(err=>{
-    console.error(err);
+  }).then(artist => {
+      return fetch(`https://api.spotify.com/v1/artists/${artist.id}/related-artists`);
+  })
+  .then(response => {
+    //testing purposes
+    if (!response.ok) {
+      return Promise.reject(response.statusText);
+    }
+    //So we don't get header reponse
+    return response.json();
+  }).then(response => {
+    artist.related = response.artists;
+    return artist;
+  })
+  .catch(err=>{
+    console.error('hi',err);
   });
 };
