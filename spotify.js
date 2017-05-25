@@ -1,3 +1,4 @@
+'use strict';
 var getFromApi = function(endpoint, query={}) {
   const url = new URL(`https://api.spotify.com/v1/${endpoint}`);
   Object.keys(query).forEach(key => url.searchParams.append(key, query[key]));
@@ -19,13 +20,12 @@ var getArtist = function(name) {
     type: 'artist'
   };
 
-
   return getFromApi('search',query).then(response=>{
     artist = response.artists.items[0];
     //console.log(artist);
     return artist;
   }).then(artist => {
-      return fetch(`https://api.spotify.com/v1/artists/${artist.id}/related-artists`);
+    return fetch(`https://api.spotify.com/v1/artists/${artist.id}/related-artists`);
   })
   .then(response => {
     //testing purposes
@@ -38,7 +38,7 @@ var getArtist = function(name) {
     artist.related = response.artists;
     return artist;
   })
-  .catch(err=>{
+  .catch(err=> {
     console.error('hi',err);
   });
 };
