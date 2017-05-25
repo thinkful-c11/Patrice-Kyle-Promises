@@ -46,11 +46,35 @@ var getArtist = function(name) {
     if (!response.ok) {
       return Promise.reject(response.statusText);
     }
-    //So we don't get header reponse
+    //So we don't get header response
     //if it was, then return the json from the api
     return response.json();
   }).then(response => {
+    //setting the artist.related to the array of related artist
     artist.related = response.artists;
+    //mapping each el to the related artist id and inputting it in the fetch url
+    const relatedArtistsTopTracks = artist.related.map(el => {
+
+      return fetch(`https://api.spotify.com/v1/artists/${el.id}/top-tracks?country=US`);
+    });
+    //runs the promise once all fetch requests are done
+    //returns array of promises  
+    return Promise.all(relatedArtistsTopTracks);
+  }).then(arrStream=>{
+  //converting each stream in the array to json (Promise)
+  //streamToJson is an array of promises
+    const streamToJson = arrStream.map(el=>{
+      //console.log(el);
+      return el.json();
+    });
+    //returns array of json objects
+    return Promise.all(streamToJson);
+
+  }).then(jsonResultsArr=>{
+    //map the top tracks to its related artist
+    jsonResultsArr.map((el,index) =>{
+      return artist.related[index].tracks = el.tracks;
+    });
     return artist;
   })
   .catch(err=> {
